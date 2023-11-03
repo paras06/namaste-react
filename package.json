@@ -19,7 +19,8 @@
   },
   "homepage": "https://github.com/paras06/namaste-react#readme",
   "devDependencies": {
-    "parcel": "^2.10.1"
+    "parcel": "^2.10.1",
+    "process": "^0.11.10"
   },
   "dependencies": {
     "react": "^18.2.0",
