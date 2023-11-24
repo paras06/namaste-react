@@ -3,6 +3,9 @@ import { useEffect, useState } from "react"; /* This is named export */
 import Shimmer from "./Shimmer"; /* This is default export */
 import { swiggy_api_URL } from "../utils/constants";
 import { Link } from "react-router-dom";
+import useOnlineStatus from "../utils/useOnlineStatus";
+import UserOffline from "./UserOffline";
+import useRestaurant from "../utils/useRestaurant";
 
 // Filter the restaurant data according input type
 function filterData(searchText, restaurants) {
@@ -16,47 +19,11 @@ function filterData(searchText, restaurants) {
 const Body = () => {
   // useState: To create a state variable, searchText, allRestaurants and filteredRestaurants is local state variable
   const [searchText, setSearchText] = useState("");
-  const [allRestaurants, setAllRestaurants] = useState([]);
-  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [filteredRestaurants, setFilteredRestaurants] = useState(null);
 
-  // use useEffect for one time call getRestaurants using empty dependency array
-  useEffect(() => {
-    getRestaurants();
-  }, []);
-
-  // async function getRestaurant to fetch Swiggy API data
-  async function getRestaurants() {
-    // handle the error using try... catch
-    try {
-      const response = await fetch(swiggy_api_URL);
-      const json = await response.json();
-
-      // initialize checkJsonData() function to check Swiggy Restaurant data
-      async function checkJsonData(jsonData) {
-        for (let i = 0; i < jsonData?.data?.cards.length; i++) {
-          // initialize checkData for Swiggy Restaurant data
-          let checkData =
-            json?.data?.cards[i]?.card?.card?.gridElements?.infoWithStyle
-              ?.restaurants;
-
-          // if checkData is not undefined then return it
-          if (checkData !== undefined) {
-            return checkData;
-          }
-        }
-      }
-
-      // call the checkJsonData() function which return Swiggy Restaurant data
-      const resData = await checkJsonData(json);
-
-      // update the state variable restaurants with Swiggy API data
-      setAllRestaurants(resData);
-      setFilteredRestaurants(resData);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const [allRestaurants, FilterRes] = useRestaurant(swiggy_api_URL);
+  const isOnline = useOnlineStatus();
 
   // use searchData function and set condition if data is empty show error message
   const searchData = (searchText, restaurants) => {
@@ -72,6 +39,10 @@ const Body = () => {
       setFilteredRestaurants(restaurants);
     }
   };
+
+  if (!isOnline) {
+    return <UserOffline />;
+  }
 
   // if allRestaurants is empty don't render restaurants cards
   if (!allRestaurants) return null;
@@ -100,21 +71,23 @@ const Body = () => {
       {errorMessage && <div className="error-container">{errorMessage}</div>}
 
       {/* if restaurants data is not fetched then display Shimmer UI after the fetched data display restaurants cards */}
-      {allRestaurants?.length === 0 ? (
+      {allRestaurants?.length === 0 && FilterRes?.length === 0 ? (
         <Shimmer />
       ) : (
         <div className="restaurant-list">
           {/* We are mapping restaurants array and passing JSON array data to RestaurantCard component as props with unique key as restaurant.data.id */}
-          {filteredRestaurants.map((restaurant) => {
-            return (
-              <Link
-                to={"/restaurant/" + restaurant?.info?.id}
-                key={restaurant?.info?.id}
-              >
-                <RestaurantCard {...restaurant?.info} />
-              </Link>
-            );
-          })}
+          {(filteredRestaurants === null ? FilterRes : filteredRestaurants).map(
+            (restaurant) => {
+              return (
+                <Link
+                  to={"/restaurant/" + restaurant?.info?.id}
+                  key={restaurant?.info?.id}
+                >
+                  <RestaurantCard {...restaurant?.info} />
+                </Link>
+              );
+            }
+          )}
         </div>
       )}
     </>
