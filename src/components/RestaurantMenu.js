@@ -20,6 +20,8 @@ const RestaurantMenu = () => {
     MENU_ITEM_TYPE_KEY
   ); // call useState to store the api data in res
 
+  console.log(menuItems);
+
   return !restaurant ? (
     <MenuShimmer />
   ) : (

@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useContext } from "react";
 import FoodFireLogo from "../../images/Food Fire Logo.png";
 import { Link } from "react-router-dom";
 import useOnlineStatus from "../utils/useOnlineStatus";
+import UserContext from "../utils/UserContext";
 
 // Title component for display logo
 const Title = () => (
@@ -21,6 +22,9 @@ const Header = () => {
   const [isLoggedin, setIsLoggedin] = useState(true);
 
   const isOnline = useOnlineStatus();
+
+  const data = useContext(UserContext);
+  console.log(data);
 
   return (
     <div className="header">

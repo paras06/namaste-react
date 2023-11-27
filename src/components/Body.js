@@ -1,4 +1,4 @@
-import RestaurantCard from "./RestaurantCard";
+import RestaurantCard, { restaurantCardPromoted } from "./RestaurantCard";
 import { useEffect, useState } from "react"; /* This is named export */
 import Shimmer from "./Shimmer"; /* This is default export */
 import { swiggy_api_URL } from "../utils/constants";
@@ -24,6 +24,8 @@ const Body = () => {
 
   const [allRestaurants, FilterRes] = useRestaurant(swiggy_api_URL);
   const isOnline = useOnlineStatus();
+
+  const RestaurantCardPromoted = restaurantCardPromoted(RestaurantCard);
 
   // use searchData function and set condition if data is empty show error message
   const searchData = (searchText, restaurants) => {
@@ -83,7 +85,11 @@ const Body = () => {
                   to={"/restaurant/" + restaurant?.info?.id}
                   key={restaurant?.info?.id}
                 >
-                  <RestaurantCard {...restaurant?.info} />
+                  {restaurant?.info?.isOpen ? (
+                    <RestaurantCardPromoted {...restaurant?.info} />
+                  ) : (
+                    <RestaurantCard {...restaurant?.info} />
+                  )}
                 </Link>
               );
             }
